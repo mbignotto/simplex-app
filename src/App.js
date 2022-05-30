@@ -6,18 +6,6 @@ function App() {
   const [numberConstraints, setNumberConstraints] = useState(0);
   const [firstTime, setFirstTime] = useState(true);
 
-  // INICIO DO PROBLEMA
-  // [1, -2, -3, -1, 0, 0, 0, 0],
-  // [0, 1, 1, 1, 1, 0, 0, 40],
-  // [0, 2, 1, -1, 0, 1, 0, 20],
-  // [0, 3, 2, -1, 0, 0, 1, 30],
-
-  // PRIMEIRA TABELA
-  // [1, 2.5, 0, -2.5, 0, 0, 1.5, 45],
-  //   [0, -0.5, 0, 1.5, 1, 0, -0.5, 25],
-  //   [0, 0.5, 0, -0.5, 0, 1, -0.5, 5],
-  //   [0, 1.5, 1, -0.5, 0, 0, 0.5, 15],
-
   const [matrix, setMatrix] = useState([
     [1, -10, -11, -1, 0, 0, 0, 0],
     [0, 1, 1, 1, 1, 0, 0, 40],
