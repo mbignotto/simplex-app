@@ -124,8 +124,6 @@ function App() {
       setMatrix((prev) => {
         let mutableMatrix = [...prev];
 
-        console.log("mutableMatrix >>>", matrix);
-
         const getNewLine = (
           matrix,
           row,
@@ -226,8 +224,6 @@ function App() {
 
   useEffect(() => {
     if (numberVars && numberConstraints) {
-      console.log("numberRows", +numberConstraints + 1);
-      console.log("numberColumns", +numberVars * 2);
       const newMatrix = Array.from({ length: +numberConstraints + 1 }, () =>
         Array.from({ length: +numberVars + +numberConstraints + 2 }, () => 0)
       );
