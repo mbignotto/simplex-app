@@ -14,10 +14,6 @@ function App() {
   ]);
   const [historyMatrix, setHistoryMatrix] = useState([]);
 
-  console.log("MATRIX >>>>", matrix);
-
-  console.log("HISTORY >>>", historyMatrix);
-
   const _renderFoMax = () => {
     let indents = [];
     for (let i = 0; i < numberVars; i++) {
