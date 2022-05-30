@@ -1,0 +1,21 @@
+.container {
+  padding: 50px;
+}
+input {
+  width: 60px;
+}
+
+.foMax {
+  margin-top: 20px;
+  display: flex;
+}
+
+
+.foMax > p {
+  margin-right: 10px;
+}
+
+.rowTable {
+  margin: 40px 40px;
+  background-color: red;
+}
