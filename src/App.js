@@ -301,7 +301,6 @@ function App() {
 
   return (
     <div className="container">
-      <button>Resetar</button>
       <div className="insertVars">
         <p className="font-bold">Numero de variaveis:</p>
         <input
