@@ -1,7 +1,17 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useSnackbar, withSnackbar } from "react-simple-snackbar";
 import "./App.css";
 
 function App() {
+  const inputRef = useRef(null);
+
+  const [openSnackbar, closeSnackbar] = useSnackbar({
+    position: "top-center",
+    style: {
+      backgroundColor: "#FF3333",
+      color: "white",
+    },
+  });
   const [numberVars, setNumberVars] = useState(0);
   const [numberConstraints, setNumberConstraints] = useState(0);
   const [firstTime, setFirstTime] = useState(true);
@@ -10,6 +20,12 @@ function App() {
   const [historyMatrix, setHistoryMatrix] = useState([]);
 
   const hasNegativeElement = matrix[0]?.some((value) => value < 0);
+
+  const getError = () => {
+    openSnackbar("Simplex inválido", 2000);
+    setMatrix([]);
+    setHistoryMatrix([]);
+  };
 
   const _renderFoMax = () => {
     let indents = [];
@@ -66,7 +82,7 @@ function App() {
                     onChangeVarInRestriction(j, i + 1, event.target.value, true)
                   }
                   type="number"
-                ></input>
+                />
               </>
             )}
           </>
@@ -114,107 +130,116 @@ function App() {
   };
 
   const getColumnIn = (matrix) => {
-    const smallValueInColumn = Math.min(
-      ...matrix[0]?.filter((value, index) => value !== 0)
-    );
+    try {
+      const smallValueInColumn = Math.min(
+        ...matrix[0]?.filter((value, index) => value !== 0)
+      );
 
-    const indexColumnSmallValue = matrix[0]?.indexOf(smallValueInColumn);
+      const indexColumnSmallValue = matrix[0]?.indexOf(smallValueInColumn);
 
-    const columnIn = matrix?.map((row) => row[indexColumnSmallValue]);
+      const columnIn = matrix?.map((row) => row[indexColumnSmallValue]);
 
-    return { columnIn, indexColumnIn: indexColumnSmallValue };
+      return { columnIn, indexColumnIn: indexColumnSmallValue };
+    } catch (e) {
+      getError();
+    }
   };
 
   const getColumnOut = (matrix, columnIn, indexColumnIn) => {
-    // separa a ultima coluna
-    const lastColumn = matrix?.map((row) => row[row.length - 1]);
+    try {
+      // separa a ultima coluna
+      const lastColumn = matrix?.map((row) => row[row.length - 1]);
 
-    // divide a ultima coluna pela linha IN
-    const lastColumnDividedColumIn = lastColumn.map((value, index) => {
-      return columnIn[index] > 0 && index !== 0 ? value / columnIn[index] : 0;
-    });
+      // divide a ultima coluna pela linha IN
+      const lastColumnDividedColumIn = lastColumn.map((value, index) => {
+        return columnIn[index] > 0 && index !== 0 ? value / columnIn[index] : 0;
+      });
 
-    // pega o menor valor da divisao das linhas de restricao para encontrar linha Pivo
-    const smallestValue = Math.min(
-      ...lastColumnDividedColumIn.filter(
-        (value, index) => value > 0 && index > 0
-      )
-    );
+      // pega o menor valor da divisao das linhas de restricao para encontrar linha Pivo
+      const smallestValue = Math.min(
+        ...lastColumnDividedColumIn.filter(
+          (value, index) => value > 0 && index > 0
+        )
+      );
 
-    //encontra a linha out
-    const indexRowOut = lastColumnDividedColumIn.findIndex(
-      (value, index) => index !== 0 && value === smallestValue
-    );
+      //encontra a linha out
+      const indexRowOut = lastColumnDividedColumIn.findIndex(
+        (value, index) => index !== 0 && value === smallestValue
+      );
 
-    const rowOut = matrix[indexRowOut];
+      const rowOut = matrix[indexRowOut];
 
-    const elementPivot = matrix[indexRowOut][indexColumnIn];
+      const elementPivot = matrix[indexRowOut][indexColumnIn];
 
-    return { rowOut, elementPivot, indexRowOut };
+      return { rowOut, elementPivot, indexRowOut };
+    } catch (e) {
+      getError();
+    }
+  };
+
+  const getNewLine = (matrix, row, indexRow, indexElement, newLinePivot) => {
+    try {
+      const elementRow = row[indexElement];
+
+      const mutipliedRow = newLinePivot.map(
+        (value) => value * (elementRow * -1)
+      );
+
+      const newLine = row.map(function (num, idx) {
+        return num + mutipliedRow[idx];
+      });
+
+      return newLine;
+    } catch (e) {
+      getError();
+    }
   };
 
   const solveSimplex = () => {
-    setFirstTime(false);
-    setHistoryMatrix((prev) => [...prev, matrix]);
+    try {
+      if (hasNegativeElement) {
+        setMatrix((prev) => {
+          let mutableMatrix = [...prev];
 
-    if (hasNegativeElement) {
-      setMatrix((prev) => {
-        let mutableMatrix = [...prev];
+          // pega a coluna IN
+          const { columnIn, indexColumnIn } = getColumnIn(mutableMatrix);
 
-        const getNewLine = (
-          matrix,
-          row,
-          indexRow,
-          indexElement,
-          newLinePivot
-        ) => {
-          const elementRow = row[indexElement];
-
-          const mutipliedRow = newLinePivot.map(
-            (value) => value * (elementRow * -1)
+          //pega a coluna OUT
+          const { rowOut, elementPivot, indexRowOut } = getColumnOut(
+            mutableMatrix,
+            columnIn,
+            indexColumnIn
           );
 
-          const newLine = row.map(function (num, idx) {
-            return num + mutipliedRow[idx];
+          // calcula a nova linha pivo
+          const newLinePivot = rowOut.map((value) => value / elementPivot);
+
+          // coloca a nova linha pivo na tabela
+          mutableMatrix[indexRowOut] = newLinePivot;
+
+          mutableMatrix.forEach((row, index) => {
+            const columnElement = indexColumnIn;
+
+            if (index !== indexRowOut) {
+              const newLine = getNewLine(
+                mutableMatrix,
+                row,
+                index,
+                columnElement,
+                newLinePivot
+              );
+              mutableMatrix[index] = newLine;
+            }
           });
 
-          return newLine;
-        };
-
-        // pega a coluna IN
-        const { columnIn, indexColumnIn } = getColumnIn(mutableMatrix);
-
-        //pega a coluna OUT
-        const { rowOut, elementPivot, indexRowOut } = getColumnOut(
-          mutableMatrix,
-          columnIn,
-          indexColumnIn
-        );
-
-        // calcula a nova linha pivo
-        const newLinePivot = rowOut.map((value) => value / elementPivot);
-
-        // coloca a nova linha pivo na tabela
-        mutableMatrix[indexRowOut] = newLinePivot;
-
-        mutableMatrix.forEach((row, index) => {
-          const columnElement = indexColumnIn;
-
-          if (index !== indexRowOut) {
-            const newLine = getNewLine(
-              mutableMatrix,
-              row,
-              index,
-              columnElement,
-              newLinePivot
-            );
-            mutableMatrix[index] = newLine;
-          }
+          return mutableMatrix;
         });
-
-        return mutableMatrix;
-      });
+      }
+    } catch (e) {
+      getError();
     }
+    setFirstTime(false);
+    setHistoryMatrix((prev) => [...prev, matrix]);
   };
 
   const _renderTableHeader = () => {
@@ -276,6 +301,7 @@ function App() {
 
   return (
     <div className="container">
+      <button>Resetar</button>
       <div className="insertVars">
         <p className="font-bold">Numero de variaveis:</p>
         <input
