@@ -1,21 +1,147 @@
+p {
+  font-family: "Roboto";
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+input {
+  width: 60px;
+  height: 25px;
+  border: 1px solid #d5d5d5d5;
+  border-radius: 5px;
+  text-align: center;
+  margin: 0
+}
+
 .container {
   padding: 50px;
 }
-input {
-  width: 60px;
+
+.insertVars {
+  display: flex;
+  margin-bottom: 10px;
+  align-items: center;
 }
 
-.foMax {
+.insertVars > p {
+  margin-right: 10px;
+}
+
+
+.lineInsertVars {
   margin-top: 20px;
   display: flex;
+  align-items: center;
+}
+.lineInsertVars > p {
+  margin-right: 10px;
+  margin-left: 10px;
 }
 
+.constraints {
+  margin-top: 20px;
+}
 
-.foMax > p {
+.lineInsertVars {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.lineInsertVars > p {
   margin-right: 10px;
+  margin-left: 10px;
 }
 
 .rowTable {
   margin: 40px 40px;
   background-color: red;
+}
+
+.flex-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+.flex-table thead {
+  color: #fff;
+  background: #009485;
+}
+.flex-table thead tr,
+.flex-table tbody tr {
+  display: flex;
+}
+
+.flex-table tbody tr+tr {
+  border-top: 1px solid #ccc;
+
+}
+
+.flex-table tbody tr{
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-table thead tr th,
+.flex-table tbody tr td {
+  display: flex;
+  flex: 1;
+  padding: .5em;
+}
+
+.flex-table tbody tr:nth-child(odd) {
+  background-color: rgb(230, 230, 230);
+}
+
+.containerHeaderAlgoritim {
+  display: flex;
+  flex: 1;
+  background-color: #F5F5F5;
+  padding: 20px;
+  margin-top: 30px;
+}
+
+.containerHeaderAlgoritim > p {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.result {
+  margin-top: 30px;
+}
+
+
+.containerBtnCalcular {
+  margin-top: 15px;
+}
+
+.containerBtnCalcular > button {
+  background-color: #009485;
+  border: none;
+  height: 40px;
+  width: 100px;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.nextStep {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nextStep > button {
+  width: 400px;
+  height: 40px;
+  background-color: #009485;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: bold;
 }

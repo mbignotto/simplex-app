@@ -6,13 +6,10 @@ function App() {
   const [numberConstraints, setNumberConstraints] = useState(0);
   const [firstTime, setFirstTime] = useState(true);
 
-  const [matrix, setMatrix] = useState([
-    [1, -10, -11, -1, 0, 0, 0, 0],
-    [0, 1, 1, 1, 1, 0, 0, 40],
-    [0, 2, 1, -1, 0, 1, 0, 20],
-    [0, 3, 2, -1, 0, 0, 1, 30],
-  ]);
+  const [matrix, setMatrix] = useState([]);
   const [historyMatrix, setHistoryMatrix] = useState([]);
+
+  const hasNegativeElement = matrix[0]?.some((value) => value < 0);
 
   const _renderFoMax = () => {
     let indents = [];
@@ -37,8 +34,8 @@ function App() {
     for (let j = 0; j < numberConstraints; j++) {
       let variables = [];
       constraints.push(
-        <div key={j} style={{ display: "flex" }}>
-          <p>{`Retricao ${j + 1}: `}</p>
+        <div key={j} className="lineInsertVars">
+          <p>{`Restrição ${j + 1}: `}</p>
           {variables}
         </div>
       );
@@ -116,6 +113,46 @@ function App() {
     setMatrix(copy);
   };
 
+  const getColumnIn = (matrix) => {
+    const smallValueInColumn = Math.min(
+      ...matrix[0]?.filter((value, index) => value !== 0)
+    );
+
+    const indexColumnSmallValue = matrix[0]?.indexOf(smallValueInColumn);
+
+    const columnIn = matrix?.map((row) => row[indexColumnSmallValue]);
+
+    return { columnIn, indexColumnIn: indexColumnSmallValue };
+  };
+
+  const getColumnOut = (matrix, columnIn, indexColumnIn) => {
+    // separa a ultima coluna
+    const lastColumn = matrix?.map((row) => row[row.length - 1]);
+
+    // divide a ultima coluna pela linha IN
+    const lastColumnDividedColumIn = lastColumn.map((value, index) => {
+      return columnIn[index] > 0 && index !== 0 ? value / columnIn[index] : 0;
+    });
+
+    // pega o menor valor da divisao das linhas de restricao para encontrar linha Pivo
+    const smallestValue = Math.min(
+      ...lastColumnDividedColumIn.filter(
+        (value, index) => value > 0 && index > 0
+      )
+    );
+
+    //encontra a linha out
+    const indexRowOut = lastColumnDividedColumIn.findIndex(
+      (value, index) => index !== 0 && value === smallestValue
+    );
+
+    const rowOut = matrix[indexRowOut];
+
+    const elementPivot = matrix[indexRowOut][indexColumnIn];
+
+    return { rowOut, elementPivot, indexRowOut };
+  };
+
   const solveSimplex = () => {
     setFirstTime(false);
     setHistoryMatrix((prev) => [...prev, matrix]);
@@ -142,48 +179,6 @@ function App() {
           });
 
           return newLine;
-        };
-
-        const getColumnIn = (matrix) => {
-          const smallValueInColumn = Math.min(
-            ...matrix[0].filter((value, index) => value !== 0)
-          );
-
-          const indexColumnSmallValue = matrix[0].indexOf(smallValueInColumn);
-
-          const columnIn = matrix.map((row) => row[indexColumnSmallValue]);
-
-          return { columnIn, indexColumnIn: indexColumnSmallValue };
-        };
-
-        const getColumnOut = (matrix, columnIn, indexColumnIn) => {
-          // separa a ultima coluna
-          const lastColumn = matrix.map((row) => row[row.length - 1]);
-
-          // divide a ultima coluna pela linha IN
-          const lastColumnDividedColumIn = lastColumn.map((value, index) => {
-            return columnIn[index] > 0 && index !== 0
-              ? value / columnIn[index]
-              : 0;
-          });
-
-          // pega o menor valor da divisao das linhas de restricao para encontrar linha Pivo
-          const smallestValue = Math.min(
-            ...lastColumnDividedColumIn.filter(
-              (value, index) => value > 0 && index > 0
-            )
-          );
-
-          //encontra a linha out
-          const indexRowOut = lastColumnDividedColumIn.findIndex(
-            (value, index) => index !== 0 && value === smallestValue
-          );
-
-          const rowOut = matrix[indexRowOut];
-
-          const elementPivot = matrix[indexRowOut][indexColumnIn];
-
-          return { rowOut, elementPivot, indexRowOut };
         };
 
         // pega a coluna IN
@@ -222,32 +217,6 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    if (numberVars && numberConstraints) {
-      const newMatrix = Array.from({ length: +numberConstraints + 1 }, () =>
-        Array.from({ length: +numberVars + +numberConstraints + 2 }, () => 0)
-      );
-
-      setMatrix(newMatrix);
-    }
-  }, [numberVars, numberConstraints]);
-
-  const hasNegativeElement = matrix[0].some((value) => value < 0);
-
-  const _renderTableData = (matrix) => {
-    return matrix.map((row) => {
-      return (
-        <tr>
-          {row.map((value) => {
-            return (
-              <td>{Number.isInteger(value) ? value : value.toFixed(2)}</td>
-            );
-          })}
-        </tr>
-      );
-    });
-  };
-
   const _renderTableHeader = () => {
     let teste = [];
 
@@ -272,75 +241,119 @@ function App() {
 
     return teste;
   };
+
+  const _renderTableData = (matrix) => {
+    return matrix.map((row) => {
+      return (
+        <tr>
+          {row.map((value) => {
+            return (
+              <td>{Number.isInteger(value) ? value : value.toFixed(2)}</td>
+            );
+          })}
+        </tr>
+      );
+    });
+  };
+
+  const HeaderAlgoritim = ({ number }) => {
+    return (
+      <div className="containerHeaderAlgoritim">
+        <p>Agoritimo #{number}</p>
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    if (numberVars && numberConstraints) {
+      const newMatrix = Array.from({ length: +numberConstraints + 1 }, () =>
+        Array.from({ length: +numberVars + +numberConstraints + 2 }, () => 0)
+      );
+
+      setMatrix(newMatrix);
+    }
+  }, [numberVars, numberConstraints]);
+
   return (
     <div className="container">
-      <div>
-        <p>Numero de variaveis</p>
+      <div className="insertVars">
+        <p className="font-bold">Numero de variaveis:</p>
         <input
           type="number"
           onChange={(event) => setNumberVars(event.target.value)}
         />
       </div>
-      <div>
-        <p>Numero de restricoes</p>
+      <div className="insertVars">
+        <p className="font-bold">Numero de restricoes:</p>
         <input
           type="number"
           onChange={(event) => setNumberConstraints(event.target.value)}
         />
       </div>
+      {numberVars > 0 && numberConstraints > 0 && (
+        <>
+          <div className="lineInsertVars">
+            <p className="font-bold">Maximizar: Z=</p>
+            {_renderFoMax()}
+          </div>
+          <div className="constraints">
+            <p className="font-bold">Restrições: </p>
+            {_renderConstraints()}
+          </div>
+        </>
+      )}
 
-      <div className="foMax">
-        <p>Maximizar: Z=</p>
-        {_renderFoMax()}
-      </div>
-
-      <div className="constraints">
-        <p>Constraints: </p>
-        {_renderConstraints()}
-      </div>
-
-      {firstTime && <button onClick={() => solveSimplex()}>Calcular</button>}
-
+      {firstTime && numberVars > 0 && numberConstraints > 0 && (
+        <div className="containerBtnCalcular">
+          <button onClick={() => solveSimplex()}>Calcular</button>
+        </div>
+      )}
       <div className="result">
-        <p>Solução: </p>
-
-        {historyMatrix.map((matrix, index) => {
-          return (
-            <>
-              <p>Agoritimo #{index + 1}</p>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Z</th>
-                    {_renderTableHeader()}
-                    <th>B</th>
-                  </tr>
-                </thead>
-                <tbody>{_renderTableData(matrix)}</tbody>
-              </table>
-            </>
-          );
-        })}
-
-        {!hasNegativeElement && (
+        {!firstTime && (
           <>
-            <p>Algoritimo #{historyMatrix.length + 1}</p>
-            <table>
-              <thead>
-                <tr>
-                  <th>Z</th>
-                  {_renderTableHeader()}
-                  <th>B</th>
-                </tr>
-              </thead>
-              <tbody>{_renderTableData(matrix)}</tbody>
-            </table>
+            <p className="font-bold">Solução: </p>
+
+            {historyMatrix.map((matrix, index) => {
+              return (
+                <>
+                  <HeaderAlgoritim number={index + 1} />
+                  <table className="flex-table">
+                    <thead>
+                      <tr>
+                        <th>Z</th>
+                        {_renderTableHeader()}
+                        <th>B</th>
+                      </tr>
+                    </thead>
+                    <tbody>{_renderTableData(matrix)}</tbody>
+                  </table>
+                </>
+              );
+            })}
+
+            {!hasNegativeElement && (
+              <>
+                <HeaderAlgoritim number={historyMatrix.length + 1} />
+
+                <table className="flex-table">
+                  <thead>
+                    <tr>
+                      <th>Z</th>
+                      {_renderTableHeader()}
+                      <th>B</th>
+                    </tr>
+                  </thead>
+                  <tbody>{_renderTableData(matrix)}</tbody>
+                </table>
+              </>
+            )}
           </>
         )}
       </div>
-
       {hasNegativeElement && !firstTime && (
-        <button onClick={() => solveSimplex()}>Próximo passo</button>
+        <div className="nextStep">
+          <button onClick={() => solveSimplex()}>Próximo passo</button>
+        </div>
       )}
     </div>
   );
