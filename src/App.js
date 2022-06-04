@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSnackbar, withSnackbar } from "react-simple-snackbar";
+import { useSnackbar } from "react-simple-snackbar";
 import "./App.css";
 
 function App() {
-  const inputRef = useRef(null);
-
   const [openSnackbar, closeSnackbar] = useSnackbar({
     position: "top-center",
     style: {
