@@ -301,38 +301,50 @@ function App() {
 
   return (
     <div className="container">
-      <div className="insertVars">
-        <p className="font-bold">Numero de variaveis:</p>
-        <input
-          type="number"
-          onChange={(event) => setNumberVars(event.target.value)}
-        />
-      </div>
-      <div className="insertVars">
-        <p className="font-bold">Numero de restricoes:</p>
-        <input
-          type="number"
-          onChange={(event) => setNumberConstraints(event.target.value)}
-        />
-      </div>
-      {numberVars > 0 && numberConstraints > 0 && (
-        <>
-          <div className="lineInsertVars">
-            <p className="font-bold">Maximizar: Z=</p>
-            {_renderFoMax()}
+      <div className="row">
+        <div>
+          <div className="insertVars">
+            <p className="font-bold">Numero de variaveis:</p>
+            <input
+              type="number"
+              onChange={(event) => setNumberVars(event.target.value)}
+            />
           </div>
-          <div className="constraints">
-            <p className="font-bold">Restrições: </p>
-            {_renderConstraints()}
+          <div className="insertVars">
+            <p className="font-bold">Numero de restricoes:</p>
+            <input
+              type="number"
+              onChange={(event) => setNumberConstraints(event.target.value)}
+            />
           </div>
-        </>
-      )}
+          {numberVars > 0 && numberConstraints > 0 && (
+            <>
+              <div className="lineInsertVars">
+                <p className="font-bold">Maximizar: Z=</p>
+                {_renderFoMax()}
+              </div>
+              <div className="constraints">
+                <p className="font-bold">Restrições: </p>
+                {_renderConstraints()}
+              </div>
+            </>
+          )}
 
-      {firstTime && numberVars > 0 && numberConstraints > 0 && (
-        <div className="containerBtnCalcular">
-          <button onClick={() => solveSimplex()}>Calcular</button>
+          {firstTime && numberVars > 0 && numberConstraints > 0 && (
+            <div className="containerBtnCalcular">
+              <button onClick={() => solveSimplex()}>Calcular</button>
+            </div>
+          )}
         </div>
-      )}
+
+        {!hasNegativeElement && matrix.length > 0 && !firstTime && (
+          <div className="zvalue">
+            <p>RESULTADO FINAL:</p>
+            <p>Z = {matrix[0][matrix[0].length - 1].toFixed(2)}</p>
+          </div>
+        )}
+      </div>
+
       <div className="result">
         {!firstTime && (
           <>
